@@ -2,16 +2,22 @@ $ = require('./jq.js');
 var PieceImage = require('./pieceimage.js');
 class FullImage {
 	/* 
+	_bodySize: {
+		width	: 0,
+		height	: 0
+	},
 	config = {
 		backgroud: 'img/body_bg.jpg',
 		containerSelector: '', // parent container css selector
-	}
+	},
+	pieceImageArr = [],
 	
 	*/
 	constructor (srcArr, config = null) {
 		this._srcArr = srcArr;
 		this._config = config;
 		this._initDom();
+		this._initBaseData();
 	}
 
 	_initDom () {
@@ -24,9 +30,105 @@ class FullImage {
 		$(this._config.containerSelector).append(this._domContainer);
 	}
 
-	setConfig(config) {
-		this._config = config;
+	_initBaseData () {
+		this._imgCount = srcArr.length;
+		this._loadingFinishCount = 0;
+		this._initData();
+		this._getBodySize();
+		this._timer = null;
 	}
+
+	_getBodySize () {
+		this._bodySize.width  = parseInt($("body").css("height"));
+		this._bodySize.height = parseInt($("body").css("width"));
+	}
+
+	_initData () {
+		var top = left = relTop = relLeft = 0;
+		this.finish = 0;
+		var that = this;
+		for (var index = 0; index < this._srcArr.length; index ++) {
+			this.pieceImageArr[index] = new PieceImage(imgUrlArr[i]);
+			this.pieceImageArr[index].setImgPos(top, left);
+			this.pieceImageArr[index].setImgRelPos(relTop, relLeft);
+			// 向右移动
+			left += 20;
+			relLeft += 25;
+			// 向下移动
+			if((i + 1)%5 == 0) {
+				left = relLeft = 0;
+				top += 20;
+				relTop += 25;
+			}
+			this.pieceImageArr[index].onloadImg(function() {
+				that._loadingFinishCount ++;
+				if (that._loadingFinishCount == that._imgCount) {
+					that._setImage2FullDiv(that._srcArr[0], 600);
+				}
+			});
+			// 绑定时间，点击集合
+			this.pieceImageArr[index].bindClickEvent(function(){
+				that._domContainer.stop(true);
+				that._domContent.stop(true);
+				clearTimeout(that._timer);
+				if(parseInt(that._domContent.css("width"))!=800){
+					var marginT=(height_w-500)/2;
+					var marginL=(width_w-800)/2;
+					
+					$(".content li img").animate({"margin":"0px","width":"160px","height":"100px"}, 200, function (){
+						that._domContent.animate({
+						"width":"800px",
+						"height":"500px",
+						"margin-top":marginT+"px",
+						"margin-left":marginL+"px"	
+						
+						},1000);
+
+						that._domContainer.animate({"margin-left":-marginLeft-marLs+"px","margin-top":-xyz+"px"},1000,function (){
+							that._domContent.css({"box-shadow":"2px 2px 6px -1px #111111"});
+							$(".left").animate({"margin-left":"0px"},400);
+							$(".right").animate({"margin-right":"0px"},400);	
+						});
+						that.rotate(false);
+					});
+
+					that._setImage2FullDiv(this._src,1000);
+				}
+				else{
+					$(".left").animate({"margin-left":"-95px"},400);
+					$(".right").animate({"margin-right":"-95px"},400);
+					that._domContent.css("box-shadow","0px 0px 0px 0px #111111");
+					that._domContent.animate({
+						"width":width_w+"px",
+						"height":height_w+"px",
+						"margin-top":"0px",
+						"margin-left":"0px"
+					},600);
+					that.rotate(true);
+					that._timer = setTimeout(that._spreadForAll,600);
+					$(that._domContent).find('li span a, li span strong').fadeOut(700);
+					that._domContainer.animate({"margin-left":-marginLeft+"px","margin-top":-xyz+marginTop+"px"},600);
+				}
+			});
+		}
+	}
+
+	_setImage2FullDiv (url, fadeDelay = 600) {
+		var left = top = 0;
+		for (var index = 0; index < this._srcArr.length; index ++) {
+			left += 25;
+			if((i + 1)%5 == 0) {
+				left=0;
+				top=top+25;
+			}
+			this.pieceImageArr[index].setPieceImage(url, fadeDelay);
+		}
+	}
+
+	_spreadForAll () {
+		$(this._domContainer).find('img').animate({"margin":"5px","width":"150px","height":"90px"},300);
+	}
+
 
 	runFullImage() {
 		
@@ -112,120 +214,7 @@ $(body_bg).load(function (){
 		rotate(true);
 		var r=setTimeout(style,600);
 	};
-
-	//图片加载和归位
-	$(function initEveryImage(){
-		var top = left = 0;
-		var relTop = relLeft = 0;
-		for(var i=0; i< imgUrlArr.length; i++){
-			var pieceImage = new PieceImage(imgUrlArr[i]);
-			pieceImage.setImgPos(top, left);
-			pieceImage.setImgRelPos(relTop, relLeft);
-			// 向右移动
-			left += 20;
-			relLeft += 25;
-			// 向下移动
-			if((i + 1)%5 == 0){
-				left = relLeft = 0;
-				top += 20;
-				relTop += 25;
-			}
-		}
-	});
-
-	//图片加载和归位
-	$(function ImgPValue(){
-		var Top  = 0;
-		var Left = 0;
-		var left_P= 0;
-		var top_P = 0;
-		for(var i=0; i< imgUrlArr.length; i++){
-			arr[i]=i;
-			ImgPV_T[i]=Top;
-			ImgPV_L[i]=Left;
-			leftP[i]  =left_P;
-			topP[i]   =top_P;
-			Left=Left+20;
-			left_P=left_P+25;
-			if((i + 1)%5 == 0){
-				Left=0;
-				left_P=0;
-				Top=Top+20;	
-				top_P=top_P+25;
-			};
-		};
-		ImgBgPos(imgUrlArr[0],0);
-	});
 	
-	$(function ImgPos(){
-		var x=0;
-		if(Index<LiObj.length){
-			Img.eq(Index).attr("src",ImgUrl[Index]);
-			Img.eq(Index).load(function(){
-				x++;
-				var x=$(this).parent().parent("li").index();
-				LiObj.eq(x).animate({"top":ImgPV_T[x]+"%","left":ImgPV_L[x]+"%"},600);
-				if(x==LiObj.length-1){
-					var t= setTimeout(GifNone,2000);
-				}
-			});
-			Index++;
-			ImgPos();
-		};
-	});
-	
-	//图片背景定位
-	function ImgBgPos(url,s){
-		var x    = 0;
-		var Left = 0;
-		var Top  = 0;
-		for(var i=0; i<AObj.length; i++){
-			x++;
-			AObj.eq(i).css("background","url("+url+") "+Left+"% "+Top+"%");
-			Strong.eq(i).css("background","url("+url+") "+Left+"% "+Top+"%");
-			AObj.eq(i).fadeIn(s);
-			Strong.eq(i).fadeIn(s);
-			Left=Left+25;
-			if(x==5){
-				x=0;
-				Left=0;
-				Top=Top+25;
-			};
-		};
-	};
-	//img旋转
-	function rotate(falses){
-		for(var i=0; i<LiObj.length; i++){
-			if(falses){
-				var x=parseInt(Math.random()*20+1);
-			}
-			else{
-				var x=0;
-			};
-			var y=Math.random();
-			if(y>0.5){
-				LiObj.eq(i).css({
-					"transform":"rotate("+x+"deg)",
-					"-o-transform":"rotate("+x+"deg)",
-					"-moz-transform":"rotate("+x+"deg)",
-					"-webkit-transform":"rotate("+x+"deg)"
-				});
-			}else{
-				LiObj.eq(i).css({
-					"transform":"rotate("+-x+"deg)",
-					"-o-transform":"rotate("+-x+"deg)",
-					"-moz-transform":"rotate("+-x+"deg)",
-					"-webkit-transform":"rotate("+-x+"deg)"
-				});	
-			};
-		};
-	};
-	
-	//container散开
-	function style(){
-			
-			$(".content li img").animate({"margin":"5px","width":"150px","height":"90px"},300);
-	};
 	function CDispersion(s){
 		var width    = parseInt(bodyW/100*80);
 		var height   = parseInt(bodyH/100*80);

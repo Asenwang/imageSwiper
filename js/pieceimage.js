@@ -1,4 +1,3 @@
-$ = require('./jq.js');
 class PieceImage {
 	/*
 	_src = '';		 // 图片源
@@ -74,8 +73,44 @@ class PieceImage {
 		let symbol = this._getSymbol(type);
 		return {top: `${this._imgPos.top}+ ${symbol}`, left: `${this._imgPos.top}+ ${symbol}`};
 	}
-	getImgRelPosCss(type = 'percent') {
+	getImgRelPosCss(url, type = 'percent') {
+		let src = url || this._src;
 		let symbol = this._getSymbol(type);
-		return `url(${this._src}) ${this._imgRelPos.left}% ${this._imgRelPos.top}%`;
+		return `url(${src}) ${this._imgRelPos.left}% ${this._imgRelPos.top}%`;
+	}
+
+	setPieceImage (url, fadeDelay) {
+		var relPos = this.getImgRelPosCss(url);
+		this._domA.css('background', relPos);
+		this._domA.fadeIn(fadeDelay);
+		this._domStrong.css('background', relPos);
+		this._domStrong.fadeIn(fadeDelay);
+	}
+
+	onloadImg(callback) {
+		var img = new Image();
+		var that = this;
+		img.onload = function () {
+			that._domLi.animate(that.getImgPosCss(), 600);
+			callback();
+		};
+		img.src = this._src;
+	}
+
+	rotate(turnOn = true) {
+		var seedDeg = turnOn ? parseInt(Math.random() * 20 + 1) : 0;
+		var seedControl = Math.random();
+		seedDeg = (seedControl > 0.5) ? seedDeg : -seedDeg;
+		this._domLi.css({
+			"transform":"rotate("+ seedDeg +"deg)",
+			"-o-transform":"rotate("+ seedDeg +"deg)",
+			"-moz-transform":"rotate("+ seedDeg +"deg)",
+			"-webkit-transform":"rotate("+ seedDeg +"deg)"
+		});
+
+	}
+
+	bindClickEvent(callback) {
+		$(this._domLi).click(callback);
 	}
 }
